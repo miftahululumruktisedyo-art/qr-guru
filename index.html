@@ -767,10 +767,9 @@
      * =========================================================================
      * KONFIGURASI PENTING: LINK GOOGLE SHEETS / WEB APP GOOGLE APPS SCRIPT
      * =========================================================================
-     * Tempelkan URL Web App hasil Deploy Google Apps Script Anda di bawah ini
-     * Contoh: "https://script.google.com/macros/s/AKfycbx.../exec"
+     * Tempelkan URL Web App hasil Deploy Google Apps Script Anda di dalam tanda kutip bawah ini
      */
-    const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyKxc2jmzxNDyQihj0I6Iyf6DKNpw6LP2zz7bl7yEvb7HogKGrD67IvXyFxvfNxXywP/exec"; // <-- PASTE URL SPREADSHEET (WEB APP) DI SINI
+    const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyKxc2jmzxNDyQihj0I6Iyf6DKNpw6LP2zz7bl7yEvb7HogKGrD67IvXyFxvfNxXywP/exec"; 
 
     // State Global
     let currentUser = null;
@@ -784,7 +783,7 @@
     let webAppUrl = DEFAULT_WEB_APP_URL || localStorage.getItem("GAS_WEB_APP_URL") || "";
 
     /**
-     * Hybrid API Dispatcher (Melakukan request POST langsung ke URL Web App Spreadsheet)
+     * Hybrid API Dispatcher
      */
     function callBackend(actionName, paramsArray, onSuccess, onFailure) {
       if (webAppUrl && webAppUrl.startsWith("http")) {
@@ -818,7 +817,6 @@
           });
         runner[actionName](...paramsArray);
       } else {
-        // Mode simulasi lokal jika URL belum diisi
         simulateMock(actionName, paramsArray, onSuccess);
       }
     }
@@ -1090,14 +1088,22 @@
       });
     }
 
+    /**
+     * PERBAIKAN FITUR GENERATE QR CODE KELAS
+     */
     function generateQRCodeKelas(defaultClass) {
-      const kodeInput = defaultClass || document.getElementById("inputKodeKelasQR").value.trim();
+      const inputElem = document.getElementById("inputKodeKelasQR");
+      const kodeInput = defaultClass || (inputElem ? inputElem.value.trim() : "");
+      
       if (!kodeInput) {
         showAlert("warning", "Kode Kelas Kosong", "Masukkan nama atau kode kelas terlebih dahulu.");
         return;
       }
 
-      const cleanClass = kodeInput.toUpperCase().replace(/\S+/g, ' ').trim();
+      // Bersihkan string tanpa merusak huruf/angka (hanya merapikan spasi ganda)
+      const cleanClass = kodeInput.toUpperCase().trim().replace(/\s+/g, ' ');
+      if (inputElem) inputElem.value = cleanClass;
+      
       const payloadString = `ABSEN_KELAS_${cleanClass}`;
 
       document.getElementById("previewNamaKelas").innerText = `KELAS ${cleanClass}`;
@@ -1105,15 +1111,33 @@
 
       const container = document.getElementById("qrcodeContainer");
       container.innerHTML = "";
-      
-      new QRCode(container, {
-        text: payloadString,
-        width: 180,
-        height: 180,
-        colorDark : "#0f172a",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
-      });
+
+      // 1. Coba render menggunakan library QRCodeJS
+      let isRendered = false;
+      try {
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(container, {
+            text: payloadString,
+            width: 180,
+            height: 180,
+            colorDark : "#0f172a",
+            colorLight : "#ffffff",
+            correctLevel : 2 // Level H (High Error Correction)
+          });
+          isRendered = true;
+        }
+      } catch (err) {
+        console.warn("Library QRCode.js bermasalah, mengalihkan ke QR Server Fallback API...", err);
+      }
+
+      // 2. Fallback otomatis jika library CDN tidak terdeteksi / bermasalah
+      if (!isRendered) {
+        const img = document.createElement("img");
+        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadString)}`;
+        img.alt = `QR Code Kelas ${cleanClass}`;
+        img.className = "w-[180px] h-[180px] mx-auto rounded-lg shadow-sm border border-slate-200";
+        container.appendChild(img);
+      }
     }
 
     function loadDaftarGuru() {
