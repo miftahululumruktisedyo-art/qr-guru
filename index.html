@@ -286,9 +286,18 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih / Ketik Kode Kelas</label>
-                <input type="text" id="inputKodeKelasQR" placeholder="Contoh: 7A atau 10A" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kelas Tersimpan</label>
+                <select id="selectKelasQR" onchange="handleSelectKelasQRChange()" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="" disabled selected>-- Pilih Kelas --</option>
+                  <!-- Dipopulasikan via JS -->
+                </select>
               </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Atau Ketik Kode Kelas Manual</label>
+                <input type="text" id="inputKodeKelasQR" placeholder="Contoh: 7A, 8B, atau 10A" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+
               <button onclick="generateQRCodeKelas()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow transition text-xs flex items-center justify-center space-x-1.5">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
                 <span>Buat QR Code Kelas</span>
@@ -771,13 +780,17 @@
      */
     const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyKxc2jmzxNDyQihj0I6Iyf6DKNpw6LP2zz7bl7yEvb7HogKGrD67IvXyFxvfNxXywP/exec"; 
 
+    // Daftar Kelas Default MTs & MA
+    const DEFAULT_KELAS_LIST = ["7A", "7B", "8A", "8B", "9A", "9B", "10A", "10B", "11A", "11B", "12A", "12B"];
+
     // State Global
     let currentUser = null;
     let currentRole = null;
     let configGlobal = {};
-    let html5QrScanner = null;
+    let html5QrCode = null;
     let verifiedClassCode = null;
     let onConfirmCallback = null;
+    let daftarGuruGlobal = [];
     
     // Inisialisasi URL API (Mendahulukan DEFAULT_WEB_APP_URL, lalu LocalStorage)
     let webAppUrl = DEFAULT_WEB_APP_URL || localStorage.getItem("GAS_WEB_APP_URL") || "";
@@ -830,7 +843,10 @@
           if (u === "admin" && p === "1234") onSuccess({ status: "success", role: "admin", user: { nama: "Anwar Mahmudi, S.Pd", username: "admin" } });
           else onSuccess({ status: "success", role: "guru", user: { id: "G-001", nama: "Budi Santoso, S.Pd", mapel: ["Matematika"], username: u, kelasDiajar: ["7A", "8A", "9A", "10A"] } });
         } else if (actionName === "checkCurrentSession") onSuccess({ active: true, sessionName: "SESI 1", timeRange: "07:00-08:00" });
-        else if (actionName === "getDaftarGuru") onSuccess([{ id: "G-001", nama: "Budi Santoso, S.Pd", mapel: "Matematika", username: "budis", password: "123", kelasDiajar: "7A, 8A, 9A, 10A" }]);
+        else if (actionName === "getDaftarGuru") onSuccess([
+          { id: "G-001", nama: "Budi Santoso, S.Pd", mapel: "Matematika", username: "budis", password: "123", kelasDiajar: "7A, 8A, 9A, 10A" },
+          { id: "G-002", nama: "Siti Aminah, S.Ag", mapel: "PAI", username: "sitia", password: "123", kelasDiajar: "7B, 8B, 9B, 11A, 12A" }
+        ]);
         else if (actionName === "getRiwayatAbsensi") onSuccess([]);
         else onSuccess({ status: "success", message: "Proses berhasil (Simulasi)" });
       }, 300);
@@ -966,9 +982,7 @@
     function handleLogout() {
       currentUser = null;
       currentRole = null;
-      if (html5QrScanner) {
-        try { html5QrScanner.clear(); } catch(e){}
-      }
+      hentikanScannerKamera();
       
       userInfoPanel.classList.add("hidden");
       viewAdmin.classList.add("hidden");
@@ -1001,6 +1015,7 @@
         document.getElementById('adminTabPengaturan').classList.remove("hidden");
       } else if (tabName === 'qrcode') {
         document.getElementById('adminTabQrCode').classList.remove("hidden");
+        updateDaftarKelasAdmin();
         generateQRCodeKelas("7A");
       } else if (tabName === 'rekap') {
         document.getElementById('adminTabRekap').classList.remove("hidden");
@@ -1089,18 +1104,56 @@
     }
 
     /**
-     * PERBAIKAN FITUR GENERATE QR CODE KELAS
+     * MENGUMPULKAN KELAS TERSIMPAN DARI DATA GURU & DEFAULTS
+     */
+    function updateDaftarKelasAdmin() {
+      const selectQR = document.getElementById("selectKelasQR");
+      if (!selectQR) return;
+
+      let kelasSet = new Set(DEFAULT_KELAS_LIST);
+      
+      if (daftarGuruGlobal && daftarGuruGlobal.length > 0) {
+        daftarGuruGlobal.forEach(g => {
+          if (g.kelasDiajar) {
+            const splitted = g.kelasDiajar.split(",");
+            splitted.forEach(k => {
+              const clean = k.trim().toUpperCase();
+              if (clean && clean !== "-") kelasSet.add(clean);
+            });
+          }
+        });
+      }
+
+      const arrKelas = Array.from(kelasSet).sort();
+      selectQR.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Tersimpan --</option>';
+      arrKelas.forEach(k => {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.innerText = `Kelas ${k}`;
+        selectQR.appendChild(opt);
+      });
+    }
+
+    function handleSelectKelasQRChange() {
+      const selValue = document.getElementById("selectKelasQR").value;
+      if (selValue) {
+        document.getElementById("inputKodeKelasQR").value = selValue;
+        generateQRCodeKelas(selValue);
+      }
+    }
+
+    /**
+     * FITUR GENERATE QR CODE KELAS
      */
     function generateQRCodeKelas(defaultClass) {
       const inputElem = document.getElementById("inputKodeKelasQR");
       const kodeInput = defaultClass || (inputElem ? inputElem.value.trim() : "");
       
       if (!kodeInput) {
-        showAlert("warning", "Kode Kelas Kosong", "Masukkan nama atau kode kelas terlebih dahulu.");
+        showAlert("warning", "Kode Kelas Kosong", "Pilih dari dropdown atau masukkan nama kelas terlebih dahulu.");
         return;
       }
 
-      // Bersihkan string tanpa merusak huruf/angka (hanya merapikan spasi ganda)
       const cleanClass = kodeInput.toUpperCase().trim().replace(/\s+/g, ' ');
       if (inputElem) inputElem.value = cleanClass;
       
@@ -1112,7 +1165,6 @@
       const container = document.getElementById("qrcodeContainer");
       container.innerHTML = "";
 
-      // 1. Coba render menggunakan library QRCodeJS
       let isRendered = false;
       try {
         if (typeof QRCode !== 'undefined') {
@@ -1122,7 +1174,7 @@
             height: 180,
             colorDark : "#0f172a",
             colorLight : "#ffffff",
-            correctLevel : 2 // Level H (High Error Correction)
+            correctLevel : 2
           });
           isRendered = true;
         }
@@ -1130,7 +1182,6 @@
         console.warn("Library QRCode.js bermasalah, mengalihkan ke QR Server Fallback API...", err);
       }
 
-      // 2. Fallback otomatis jika library CDN tidak terdeteksi / bermasalah
       if (!isRendered) {
         const img = document.createElement("img");
         img.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadString)}`;
@@ -1142,9 +1193,11 @@
 
     function loadDaftarGuru() {
       callBackend("getDaftarGuru", [], function(list) {
+        daftarGuruGlobal = list || [];
+        updateDaftarKelasAdmin();
         const tbody = document.getElementById("tblGuruBody");
         tbody.innerHTML = "";
-        if (list.length === 0) {
+        if (!list || list.length === 0) {
           tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-slate-400 italic">Belum ada guru terdaftar.</td></tr>`;
           return;
         }
@@ -1540,8 +1593,15 @@
     function initGuruDashboard() {
       const kelasSelect = document.getElementById("absenKelas");
       kelasSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Mengajar --</option>';
-      if (currentUser.kelasDiajar && currentUser.kelasDiajar.length > 0) {
+      if (currentUser && currentUser.kelasDiajar && currentUser.kelasDiajar.length > 0) {
         currentUser.kelasDiajar.forEach(k => {
+          const opt = document.createElement("option");
+          opt.value = k;
+          opt.innerText = `Kelas ${k}`;
+          kelasSelect.appendChild(opt);
+        });
+      } else {
+        DEFAULT_KELAS_LIST.forEach(k => {
           const opt = document.createElement("option");
           opt.value = k;
           opt.innerText = `Kelas ${k}`;
@@ -1551,7 +1611,7 @@
 
       const mapelSelect = document.getElementById("absenMapel");
       mapelSelect.innerHTML = '<option value="" disabled selected>-- Pilih Mata Pelajaran --</option>';
-      if (currentUser.mapel && currentUser.mapel.length > 0) {
+      if (currentUser && currentUser.mapel && currentUser.mapel.length > 0) {
         currentUser.mapel.forEach(m => {
           const opt = document.createElement("option");
           opt.value = m;
@@ -1589,36 +1649,93 @@
       if (wrapper.classList.contains("hidden")) {
         wrapper.classList.remove("hidden");
         btnText.innerText = "Tutup Kamera";
-        mulaiScannerKamera();
+        setTimeout(() => {
+          mulaiScannerKamera();
+        }, 150);
       } else {
-        wrapper.classList.add("hidden");
-        btnText.innerText = "Buka Kamera Scan";
         hentikanScannerKamera();
       }
     }
 
+    /**
+     * PERBAIKAN PENGGUNAAN KAMERA
+     */
     function mulaiScannerKamera() {
-      if (html5QrScanner) {
-        try { html5QrScanner.clear(); } catch(e){}
+      const qrRegion = document.getElementById("qr-reader");
+      if (!qrRegion) return;
+      qrRegion.innerHTML = "";
+
+      if (html5QrCode) {
+        try {
+          html5QrCode.stop().then(() => {
+            try { html5QrCode.clear(); } catch(e){}
+            html5QrCode = null;
+            jalankanInstanceKamera();
+          }).catch(() => {
+            html5QrCode = null;
+            jalankanInstanceKamera();
+          });
+          return;
+        } catch (e) {
+          html5QrCode = null;
+        }
+      }
+      jalankanInstanceKamera();
+    }
+
+    function jalankanInstanceKamera() {
+      if (typeof Html5Qrcode === 'undefined') {
+        showAlert("danger", "Library Kamera Bermasalah", "Library Html5Qrcode tidak termuat. Periksa koneksi internet Anda.");
+        hentikanScannerKamera();
+        return;
       }
 
-      html5QrScanner = new Html5QrcodeScanner("qr-reader", { 
-        fps: 10, 
-        qrbox: { width: 220, height: 220 },
-        rememberLastUsedCamera: true
-      }, false);
+      html5QrCode = new Html5Qrcode("qr-reader");
+      const config = { fps: 10, qrbox: { width: 220, height: 220 } };
 
-      html5QrScanner.render(onScanSuccess, onScanFailure);
+      // Coba akses kamera belakang (facingMode environment) terlebih dahulu
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        onScanFailure
+      ).catch(err => {
+        console.warn("Gagal membuka kamera belakang secara spesifik, mencoba kamera umum...", err);
+        // Fallback coba kamera utama mana pun yang terdeteksi oleh perangkat
+        Html5Qrcode.getCameras().then(devices => {
+          if (devices && devices.length > 0) {
+            html5QrCode.start(devices[0].id, config, onScanSuccess, onScanFailure).catch(e => {
+              showAlert("danger", "Izin Kamera Ditolak", "Mohon berikan izin akses kamera pada browser ponsel Anda.");
+              hentikanScannerKamera();
+            });
+          } else {
+            showAlert("danger", "Kamera Tidak Ditemukan", "Tidak ada perangkat kamera yang terdeteksi di ponsel/komputer Anda.");
+            hentikanScannerKamera();
+          }
+        }).catch(e => {
+          showAlert("danger", "Kamera Tidak Dapat Dibuka", "Pastikan web diakses melalui koneksi aman (HTTPS) dan beri izin kamera di pengaturan browser.");
+          hentikanScannerKamera();
+        });
+      });
     }
 
     function hentikanScannerKamera() {
-      if (html5QrScanner) {
+      if (html5QrCode) {
         try {
-          html5QrScanner.clear();
-        } catch(e) {}
+          html5QrCode.stop().then(() => {
+            try { html5QrCode.clear(); } catch(e){}
+            html5QrCode = null;
+          }).catch(() => {
+            html5QrCode = null;
+          });
+        } catch (e) {
+          html5QrCode = null;
+        }
       }
-      document.getElementById("scannerWrapper").classList.add("hidden");
-      document.getElementById("btnCameraText").innerText = "Buka Kamera Scan";
+      const wrapper = document.getElementById("scannerWrapper");
+      if (wrapper) wrapper.classList.add("hidden");
+      const btnText = document.getElementById("btnCameraText");
+      if (btnText) btnText.innerText = "Buka Kamera Scan";
     }
 
     function onScanSuccess(decodedText, decodedResult) {
@@ -1626,7 +1743,7 @@
 
       const selectedClass = document.getElementById("absenKelas").value;
       if (!selectedClass) {
-        showAlert("warning", "Pilih Kelas Dulu", "Silakan pilih 'Kelas Mengajar' pada form di bawah terlebih dahulu sebelum melakukan scan.");
+        showAlert("warning", "Pilih Kelas Dulu", "Silakan pilih 'Kelas Mengajar' pada form terlebih dahulu sebelum melakukan scan.");
         return;
       }
 
@@ -1655,7 +1772,7 @@
     }
 
     function onScanFailure(error) {
-      // Pembacaan rutin kamera
+      // Pembacaan frame rutin kamera
     }
 
     function cekSesiWaktuLokal() {
