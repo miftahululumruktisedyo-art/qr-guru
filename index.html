@@ -176,8 +176,9 @@
         <!-- TAB 2.A: PENGATURAN SESI DINAMIS & MANAJEMEN GURU -->
         <div id="adminTabPengaturan" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          <!-- KOLOM KIRI: SET JAM SESI -->
+          <!-- KOLOM KIRI: SET JAM SESI & MASTER KELAS -->
           <div class="lg:col-span-5 space-y-6">
+            <!-- Form Atur Sesi Jam -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
               <div class="flex justify-between items-center mb-4">
                 <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
@@ -198,6 +199,25 @@
               <button onclick="saveAdminConfig()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold py-2 rounded-xl transition shadow flex items-center justify-center space-x-1">
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>Simpan Pengaturan Sesi</span>
+              </button>
+            </div>
+
+            <!-- Form Master Daftar Kelas Sekolah (Admin) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+              <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                <i class="fa-solid fa-school text-indigo-600"></i>
+                <span>Kelola Daftar Kelas Sekolah</span>
+              </h3>
+              <p class="text-xs text-slate-500">Kelas yang didaftarkan di sini akan muncul di menu cetak QR Code dan verifikasi otomatis absensi guru.</p>
+              
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Daftar Kelas (Pisahkan dengan Koma)</label>
+                <textarea id="inputMasterKelas" rows="3" class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="Contoh: 7A, 7B, 8A, 8B, 9A, 9B, 10A, 10B, 11A, 12A"></textarea>
+              </div>
+
+              <button onclick="saveMasterKelasAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2 rounded-xl transition shadow flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-save"></i>
+                <span>Simpan Daftar Kelas Sekolah</span>
               </button>
             </div>
           </div>
@@ -231,11 +251,6 @@
                     <input type="text" id="guruPassword" required placeholder="guru123" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
                   </div>
                 </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-500 mb-1">Kelas Diajar (pisahkan dengan koma - contoh: 7A, 8A, 9A, 10A)</label>
-                  <input type="text" id="guruKelas" required placeholder="7A, 8A, 9A, 10A" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                  <p class="text-[10px] text-slate-400 mt-1">Gunakan karakter kelas depan (7,8,9 untuk MTs dan 10,11,12 untuk MA) agar pemisahan rekap cetak akurat.</p>
-                </div>
                 <div class="flex justify-end">
                   <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-2 rounded-xl shadow transition flex items-center space-x-1">
                     <i class="fa-solid fa-plus"></i>
@@ -258,7 +273,6 @@
                       <th class="p-3 border-b">ID</th>
                       <th class="p-3 border-b">Nama</th>
                       <th class="p-3 border-b">Mata Pelajaran</th>
-                      <th class="p-3 border-b">Kelas Diajar</th>
                       <th class="p-3 border-b">User / Pass</th>
                       <th class="p-3 border-b text-center">Aksi</th>
                     </tr>
@@ -280,21 +294,21 @@
               <i class="fa-solid fa-qrcode text-indigo-600"></i>
               <span>Generator & Cetak QR Code / Barcode Kelas</span>
             </h3>
-            <p class="text-xs text-slate-500 mt-1">Cetak QR Code ini dan tempelkan di setiap dinding atau pintu ruang kelas. Guru akan melakukan scan QR Code ini ketika masuk kelas untuk absen.</p>
+            <p class="text-xs text-slate-500 mt-1">Daftar kelas di bawah dikelola oleh Admin. Pilih kelas untuk mencetak QR Code poster yang akan ditempel di ruangan kelas.</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kelas Tersimpan</label>
-                <select id="selectKelasQR" onchange="handleSelectKelasQRChange()" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kelas yang Dibuat Admin</label>
+                <select id="selectKelasQR" onchange="handleSelectKelasQRChange()" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800">
                   <option value="" disabled selected>-- Pilih Kelas --</option>
-                  <!-- Dipopulasikan via JS -->
+                  <!-- Dipopulasikan via JS dari Master Kelas Admin -->
                 </select>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Atau Ketik Kode Kelas Manual</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Atau Ketik Kode Kelas Baru</label>
                 <input type="text" id="inputKodeKelasQR" placeholder="Contoh: 7A, 8B, atau 10A" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               </div>
 
@@ -480,7 +494,7 @@
             <div class="flex-1">
               <h4 class="text-xs font-bold uppercase text-slate-400">Status Scan Barcode Kelas</h4>
               <p id="qrStatusText" class="text-sm font-semibold text-slate-700">Belum Discan</p>
-              <p id="qrDescText" class="text-[11px] text-slate-500">Silakan scan Barcode di dalam kelas mengajar Anda.</p>
+              <p id="qrDescText" class="text-[11px] text-slate-500">Scan Barcode yang ada di ruangan kelas mengajar Anda.</p>
             </div>
           </div>
 
@@ -505,7 +519,7 @@
                 <i class="fa-solid fa-camera text-indigo-600"></i>
                 <span>Kamera Scan Barcode Kelas</span>
               </h3>
-              <p class="text-xs text-slate-500">Arahkan kamera ke poster Barcode / QR Code yang tertempel di kelas.</p>
+              <p class="text-xs text-slate-500">Arahkan kamera ke poster QR Code yang tertempel di dinding kelas.</p>
             </div>
             <button id="btnToggleCamera" onclick="toggleCameraScanner()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition flex items-center space-x-1">
               <i class="fa-solid fa-camera"></i>
@@ -524,16 +538,23 @@
         <div class="bg-white rounded-2xl shadow-md border border-slate-100 p-6 md:p-8 space-y-6">
           <div class="border-b border-slate-100 pb-4 text-center">
             <h3 class="text-xl font-bold text-slate-800">Form Input Absensi Kehadiran</h3>
-            <p class="text-xs text-slate-500 mt-1">Isi form di bawah setelah Barcode Kelas berhasil terverifikasi</p>
+            <p class="text-xs text-slate-500 mt-1">Kelas otomatis terdeteksi saat Barcode discan. Lengkapi mapel dan status Anda.</p>
           </div>
 
           <form onsubmit="submitFormAbsen(event)" class="space-y-5">
-            <!-- INPUT KELAS -->
+            <!-- TAMPILAN KELAS OTOMATIS HASIL SCAN (UNTUK HADIR) / INPUT MANUAL (UNTUK NON-HADIR) -->
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-1">Pilih Kelas Mengajar</label>
-              <select id="absenKelas" required onchange="handleKelasChange()" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="" disabled selected>-- Pilih Kelas Mengajar --</option>
-              </select>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Kelas Mengajar</label>
+              <div id="wrapperKelasAuto" class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 flex items-center justify-between">
+                <span class="text-xs font-semibold text-indigo-900">Kelas Terdeteksi Barcode:</span>
+                <span id="textKelasTerdeteksi" class="font-black text-indigo-700 text-base">Belum Scan Barcode</span>
+              </div>
+              <div id="wrapperKelasManual" class="hidden mt-2">
+                <select id="absenKelasManual" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="" disabled selected>-- Pilih Kelas Mengajar (Izin/Sakit/Alpa) --</option>
+                  <!-- Dipopulasikan via JS -->
+                </select>
+              </div>
             </div>
 
             <!-- INPUT MATA PELAJARAN -->
@@ -734,11 +755,6 @@
           </div>
         </div>
 
-        <div>
-          <label class="block font-semibold text-slate-600 mb-1">Kelas Diajar (pisahkan koma)</label>
-          <input type="text" id="editGuruKelas" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="Contoh: 7A, 8A, 9A, 10A">
-        </div>
-
         <div class="flex justify-end space-x-2 pt-2">
           <button type="button" onclick="closeModalEditGuru()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl transition">Batal</button>
           <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl shadow-md transition">Simpan Perubahan</button>
@@ -780,7 +796,7 @@
      */
     const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyKxc2jmzxNDyQihj0I6Iyf6DKNpw6LP2zz7bl7yEvb7HogKGrD67IvXyFxvfNxXywP/exec"; 
 
-    // Daftar Kelas Default MTs & MA
+    // Daftar Kelas Bawaan
     const DEFAULT_KELAS_LIST = ["7A", "7B", "8A", "8B", "9A", "9B", "10A", "10B", "11A", "11B", "12A", "12B"];
 
     // State Global
@@ -789,8 +805,9 @@
     let configGlobal = {};
     let html5QrCode = null;
     let verifiedClassCode = null;
+    let autoDetectedClassName = null;
     let onConfirmCallback = null;
-    let daftarGuruGlobal = [];
+    let masterKelasAdmin = [...DEFAULT_KELAS_LIST];
     
     // Inisialisasi URL API (Mendahulukan DEFAULT_WEB_APP_URL, lalu LocalStorage)
     let webAppUrl = DEFAULT_WEB_APP_URL || localStorage.getItem("GAS_WEB_APP_URL") || "";
@@ -837,15 +854,15 @@
     function simulateMock(actionName, paramsArray, onSuccess) {
       console.warn("[MOCK] Simulasi backend tanpa URL Web App:", actionName);
       setTimeout(() => {
-        if (actionName === "getConfig") onSuccess({ SESI_1: "07:00-08:00", SESI_2: "09:30-10:00" });
+        if (actionName === "getConfig") onSuccess({ SESI_1: "07:00-08:00", SESI_2: "09:30-10:00", DAFTAR_KELAS_MASTER: "7A, 7B, 8A, 8B, 9A, 9B, 10A, 10B, 11A, 12A" });
         else if (actionName === "loginUser") {
           const u = paramsArray[0], p = paramsArray[1];
           if (u === "admin" && p === "1234") onSuccess({ status: "success", role: "admin", user: { nama: "Anwar Mahmudi, S.Pd", username: "admin" } });
-          else onSuccess({ status: "success", role: "guru", user: { id: "G-001", nama: "Budi Santoso, S.Pd", mapel: ["Matematika"], username: u, kelasDiajar: ["7A", "8A", "9A", "10A"] } });
+          else onSuccess({ status: "success", role: "guru", user: { id: "G-001", nama: "Budi Santoso, S.Pd", mapel: ["Matematika", "IPA"], username: u } });
         } else if (actionName === "checkCurrentSession") onSuccess({ active: true, sessionName: "SESI 1", timeRange: "07:00-08:00" });
         else if (actionName === "getDaftarGuru") onSuccess([
-          { id: "G-001", nama: "Budi Santoso, S.Pd", mapel: "Matematika", username: "budis", password: "123", kelasDiajar: "7A, 8A, 9A, 10A" },
-          { id: "G-002", nama: "Siti Aminah, S.Ag", mapel: "PAI", username: "sitia", password: "123", kelasDiajar: "7B, 8B, 9B, 11A, 12A" }
+          { id: "G-001", nama: "Budi Santoso, S.Pd", mapel: "Matematika", username: "budis", password: "123" },
+          { id: "G-002", nama: "Siti Aminah, S.Ag", mapel: "PAI", username: "sitia", password: "123" }
         ]);
         else if (actionName === "getRiwayatAbsensi") onSuccess([]);
         else onSuccess({ status: "success", message: "Proses berhasil (Simulasi)" });
@@ -917,6 +934,12 @@
       callBackend("getConfig", [], function(cfg) {
         showLoading(false);
         configGlobal = cfg || {};
+        
+        // Baca Master Kelas yang disimpan oleh Admin
+        if (configGlobal.DAFTAR_KELAS_MASTER) {
+          const list = configGlobal.DAFTAR_KELAS_MASTER.split(",").map(k => k.trim().toUpperCase()).filter(Boolean);
+          if (list.length > 0) masterKelasAdmin = list;
+        }
       });
     }
 
@@ -1015,8 +1038,8 @@
         document.getElementById('adminTabPengaturan').classList.remove("hidden");
       } else if (tabName === 'qrcode') {
         document.getElementById('adminTabQrCode').classList.remove("hidden");
-        updateDaftarKelasAdmin();
-        generateQRCodeKelas("7A");
+        updateDaftarKelasAdminUI();
+        if (masterKelasAdmin.length > 0) generateQRCodeKelas(masterKelasAdmin[0]);
       } else if (tabName === 'rekap') {
         document.getElementById('adminTabRekap').classList.remove("hidden");
         loadLogAbsen();
@@ -1027,6 +1050,7 @@
 
     function initAdminDashboard() {
       renderSesiInputs();
+      document.getElementById("inputMasterKelas").value = masterKelasAdmin.join(", ");
       loadDaftarGuru();
     }
 
@@ -1104,29 +1128,36 @@
     }
 
     /**
-     * MENGUMPULKAN KELAS TERSIMPAN DARI DATA GURU & DEFAULTS
+     * MENYIMPAN MASTER DAFTAR KELAS OLEH ADMIN
      */
-    function updateDaftarKelasAdmin() {
+    function saveMasterKelasAdmin() {
+      const rawInput = document.getElementById("inputMasterKelas").value.trim();
+      if (!rawInput) {
+        showAlert("warning", "Daftar Kelas Kosong", "Masukkan minimal satu nama kelas.");
+        return;
+      }
+
+      const listKelas = rawInput.split(",").map(k => k.trim().toUpperCase()).filter(Boolean);
+      masterKelasAdmin = listKelas;
+
+      showLoading(true);
+      callBackend("updateMasterKelas", [listKelas.join(", ")], function(res) {
+        showLoading(false);
+        configGlobal.DAFTAR_KELAS_MASTER = listKelas.join(", ");
+        updateDaftarKelasAdminUI();
+        showAlert("success", "Master Kelas Tersimpan", "Daftar kelas sekolah berhasil diperbarui!");
+      });
+    }
+
+    /**
+     * POPULASI KELAS YANG DIBUAT ADMIN KE DROPDOWN CETAK QR CODE
+     */
+    function updateDaftarKelasAdminUI() {
       const selectQR = document.getElementById("selectKelasQR");
       if (!selectQR) return;
 
-      let kelasSet = new Set(DEFAULT_KELAS_LIST);
-      
-      if (daftarGuruGlobal && daftarGuruGlobal.length > 0) {
-        daftarGuruGlobal.forEach(g => {
-          if (g.kelasDiajar) {
-            const splitted = g.kelasDiajar.split(",");
-            splitted.forEach(k => {
-              const clean = k.trim().toUpperCase();
-              if (clean && clean !== "-") kelasSet.add(clean);
-            });
-          }
-        });
-      }
-
-      const arrKelas = Array.from(kelasSet).sort();
-      selectQR.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Tersimpan --</option>';
-      arrKelas.forEach(k => {
+      selectQR.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Tersimpan Admin --</option>';
+      masterKelasAdmin.forEach(k => {
         const opt = document.createElement("option");
         opt.value = k;
         opt.innerText = `Kelas ${k}`;
@@ -1193,12 +1224,10 @@
 
     function loadDaftarGuru() {
       callBackend("getDaftarGuru", [], function(list) {
-        daftarGuruGlobal = list || [];
-        updateDaftarKelasAdmin();
         const tbody = document.getElementById("tblGuruBody");
         tbody.innerHTML = "";
         if (!list || list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-slate-400 italic">Belum ada guru terdaftar.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400 italic">Belum ada guru terdaftar.</td></tr>`;
           return;
         }
         list.forEach(g => {
@@ -1208,7 +1237,6 @@
             <td class="p-3 font-semibold text-slate-700">${g.id}</td>
             <td class="p-3 font-medium text-slate-800">${g.nama}</td>
             <td class="p-3 text-slate-500">${g.mapel}</td>
-            <td class="p-3 text-indigo-700 font-bold">${g.kelasDiajar}</td>
             <td class="p-3">
               <span class="block text-[11px] font-bold text-indigo-600">U: ${g.username}</span>
               <span class="block text-[10px] text-slate-400">P: ${g.password}</span>
@@ -1233,10 +1261,9 @@
       const mapel = document.getElementById("guruMapel").value.trim();
       const user = document.getElementById("guruUsername").value.trim();
       const pass = document.getElementById("guruPassword").value.trim();
-      const kelas = document.getElementById("guruKelas").value.trim();
 
       showLoading(true);
-      callBackend("addGuru", [nama, mapel, user, pass, kelas], function(response) {
+      callBackend("addGuru", [nama, mapel, user, pass], function(response) {
         showLoading(false);
         if (response.status === "success") {
           showAlert("success", "Pendaftaran Sukses", response.message);
@@ -1244,7 +1271,6 @@
           document.getElementById("guruMapel").value = "";
           document.getElementById("guruUsername").value = "";
           document.getElementById("guruPassword").value = "";
-          document.getElementById("guruKelas").value = "";
           loadDaftarGuru();
         } else {
           showAlert("danger", "Pendaftaran Gagal", response.message);
@@ -1260,7 +1286,6 @@
         document.getElementById("editGuruMapel").value = item.mapel;
         document.getElementById("editGuruUsername").value = item.username;
         document.getElementById("editGuruPassword").value = item.password;
-        document.getElementById("editGuruKelas").value = item.kelasDiajar;
         document.getElementById("modalEditGuru").classList.remove("hidden");
       } catch (err) {
         showAlert("danger", "Gagal Membuka Jendela Edit", "Data guru bermasalah.");
@@ -1278,11 +1303,10 @@
       const mapel = document.getElementById("editGuruMapel").value.trim();
       const user = document.getElementById("editGuruUsername").value.trim();
       const pass = document.getElementById("editGuruPassword").value.trim();
-      const kelas = document.getElementById("editGuruKelas").value.trim();
 
       closeModalEditGuru();
       showLoading(true);
-      callBackend("updateGuru", [id, nama, mapel, user, pass, kelas], function(response) {
+      callBackend("updateGuru", [id, nama, mapel, user, pass], function(response) {
         showLoading(false);
         if (response.status === "success") {
           showAlert("success", "Perubahan Disimpan", response.message);
@@ -1591,24 +1615,7 @@
        ========================================================================= */
 
     function initGuruDashboard() {
-      const kelasSelect = document.getElementById("absenKelas");
-      kelasSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Mengajar --</option>';
-      if (currentUser && currentUser.kelasDiajar && currentUser.kelasDiajar.length > 0) {
-        currentUser.kelasDiajar.forEach(k => {
-          const opt = document.createElement("option");
-          opt.value = k;
-          opt.innerText = `Kelas ${k}`;
-          kelasSelect.appendChild(opt);
-        });
-      } else {
-        DEFAULT_KELAS_LIST.forEach(k => {
-          const opt = document.createElement("option");
-          opt.value = k;
-          opt.innerText = `Kelas ${k}`;
-          kelasSelect.appendChild(opt);
-        });
-      }
-
+      // Mengisi Mapel Guru
       const mapelSelect = document.getElementById("absenMapel");
       mapelSelect.innerHTML = '<option value="" disabled selected>-- Pilih Mata Pelajaran --</option>';
       if (currentUser && currentUser.mapel && currentUser.mapel.length > 0) {
@@ -1620,12 +1627,23 @@
         });
       }
 
+      // Mengisi Dropdown Kelas Manual untuk Opsi Izin/Sakit/Alpa
+      const kelasManualSelect = document.getElementById("absenKelasManual");
+      kelasManualSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Mengajar (Izin/Sakit/Alpa) --</option>';
+      masterKelasAdmin.forEach(k => {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.innerText = `Kelas ${k}`;
+        kelasManualSelect.appendChild(opt);
+      });
+
       cekSesiWaktuLokal();
       resetStatusQR();
     }
 
     function handleKelasChange() {
       verifiedClassCode = null;
+      autoDetectedClassName = null;
       resetStatusQR();
     }
 
@@ -1640,6 +1658,9 @@
       icon.innerHTML = '<i class="fa-solid fa-qrcode text-xl"></i>';
       title.innerText = "Belum Discan";
       desc.innerText = "Silakan klik Buka Kamera untuk scan Barcode di kelas.";
+      
+      document.getElementById("textKelasTerdeteksi").innerText = "Belum Scan Barcode";
+      document.getElementById("textKelasTerdeteksi").className = "font-black text-indigo-400 text-base";
     }
 
     function toggleCameraScanner() {
@@ -1657,9 +1678,6 @@
       }
     }
 
-    /**
-     * PERBAIKAN PENGGUNAAN KAMERA
-     */
     function mulaiScannerKamera() {
       const qrRegion = document.getElementById("qr-reader");
       if (!qrRegion) return;
@@ -1693,7 +1711,6 @@
       html5QrCode = new Html5Qrcode("qr-reader");
       const config = { fps: 10, qrbox: { width: 220, height: 220 } };
 
-      // Coba akses kamera belakang (facingMode environment) terlebih dahulu
       html5QrCode.start(
         { facingMode: "environment" },
         config,
@@ -1701,7 +1718,6 @@
         onScanFailure
       ).catch(err => {
         console.warn("Gagal membuka kamera belakang secara spesifik, mencoba kamera umum...", err);
-        // Fallback coba kamera utama mana pun yang terdeteksi oleh perangkat
         Html5Qrcode.getCameras().then(devices => {
           if (devices && devices.length > 0) {
             html5QrCode.start(devices[0].id, config, onScanSuccess, onScanFailure).catch(e => {
@@ -1709,7 +1725,7 @@
               hentikanScannerKamera();
             });
           } else {
-            showAlert("danger", "Kamera Tidak Ditemukan", "Tidak ada perangkat kamera yang terdeteksi di ponsel/komputer Anda.");
+            showAlert("danger", "Kamera Tidak Ditemukan", "Tidak ada perangkat kamera yang terdeteksi.");
             hentikanScannerKamera();
           }
         }).catch(e => {
@@ -1738,20 +1754,25 @@
       if (btnText) btnText.innerText = "Buka Kamera Scan";
     }
 
+    /**
+     * PROSES DETEKSI KELAS OTOMATIS SAAT SCAN BERHASIL
+     */
     function onScanSuccess(decodedText, decodedResult) {
       hentikanScannerKamera();
 
-      const selectedClass = document.getElementById("absenKelas").value;
-      if (!selectedClass) {
-        showAlert("warning", "Pilih Kelas Dulu", "Silakan pilih 'Kelas Mengajar' pada form terlebih dahulu sebelum melakukan scan.");
-        return;
+      const scannedClean = decodedText.trim();
+      
+      // Ekstrak nama kelas dari format standar ABSEN_KELAS_<NAMA_KELAS>
+      let detectedClass = "";
+      if (scannedClean.startsWith("ABSEN_KELAS_")) {
+        detectedClass = scannedClean.replace("ABSEN_KELAS_", "").trim();
+      } else {
+        detectedClass = scannedClean;
       }
 
-      const expectedPayload = `ABSEN_KELAS_${selectedClass.toUpperCase().trim()}`;
-      const scannedClean = decodedText.trim();
-
-      if (scannedClean === expectedPayload || scannedClean.includes(selectedClass.toUpperCase())) {
+      if (detectedClass) {
         verifiedClassCode = scannedClean;
+        autoDetectedClassName = detectedClass;
         
         const card = document.getElementById("qrStatusCard");
         const icon = document.getElementById("qrStatusIcon");
@@ -1761,13 +1782,18 @@
         card.className = "bg-emerald-50 rounded-2xl border border-emerald-200 p-4 shadow-sm flex items-center space-x-4";
         icon.className = "p-3 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center";
         icon.innerHTML = '<i class="fa-solid fa-circle-check text-xl"></i>';
-        title.innerHTML = `<span class="text-emerald-800 font-bold">Terverifikasi (Kelas ${selectedClass})</span>`;
-        desc.innerText = "✓ Barcode kelas cocok. Silakan lengkapi form dan simpan absensi.";
+        title.innerHTML = `<span class="text-emerald-800 font-bold">Terverifikasi (Kelas ${detectedClass})</span>`;
+        desc.innerText = "✓ Barcode kelas cocok. Silakan pilih mata pelajaran lalu simpan absensi.";
 
-        showAlert("success", "Scan Berhasil!", `Barcode Kelas ${selectedClass} terverifikasi secara sah!`);
+        const labelKelas = document.getElementById("textKelasTerdeteksi");
+        labelKelas.innerText = `Kelas ${detectedClass}`;
+        labelKelas.className = "font-black text-emerald-700 text-base";
+
+        showAlert("success", "Scan Barcode Berhasil!", `Kelas ${detectedClass} berhasil terdeteksi secara otomatis.`);
       } else {
         verifiedClassCode = null;
-        showAlert("danger", "Barcode Salah!", `Barcode yang Anda scan bukan untuk Kelas ${selectedClass}. Silakan scan Barcode di dalam ruangan kelas ${selectedClass}.`);
+        autoDetectedClassName = null;
+        showAlert("danger", "Barcode Tidak Dikenali!", "Barcode yang Anda scan bukan Barcode Kelas yang sah.");
       }
     }
 
@@ -1801,6 +1827,9 @@
     function toggleKeteranganField(status) {
       const wrapper = document.getElementById("keteranganWrapper");
       const text = document.getElementById("absenKeterangan");
+      const autoKelasWrapper = document.getElementById("wrapperKelasAuto");
+      const manualKelasWrapper = document.getElementById("wrapperKelasManual");
+      const selectManual = document.getElementById("absenKelasManual");
       
       const radios = document.getElementsByName("absenStatus");
       radios.forEach(r => {
@@ -1819,17 +1848,26 @@
         text.required = (status !== 'A');
         if (status === 'A') text.value = "Alpa (Tanpa Keterangan)";
         else text.value = "";
+
+        // Tampilkan pilihan kelas manual untuk non-hadir
+        autoKelasWrapper.classList.add("hidden");
+        manualKelasWrapper.classList.remove("hidden");
+        selectManual.required = true;
       } else {
         wrapper.classList.add("hidden");
         text.required = false;
         text.value = "";
+
+        // Tampilkan kotak kelas otomatis barcode
+        autoKelasWrapper.classList.remove("hidden");
+        manualKelasWrapper.classList.add("hidden");
+        selectManual.required = false;
       }
     }
 
     function submitFormAbsen(e) {
       e.preventDefault();
 
-      const kelas = document.getElementById("absenKelas").value;
       const mapel = document.getElementById("absenMapel").value;
       const ket = document.getElementById("absenKeterangan").value.trim();
       
@@ -1844,23 +1882,33 @@
         return;
       }
 
+      let finalKelas = "";
+
       if (status === "H") {
-        if (!verifiedClassCode) {
-          showAlert("danger", "Belum Scan Barcode", `Anda wajib melakukan scan Barcode yang ada di Kelas ${kelas} terlebih dahulu.`);
+        if (!verifiedClassCode || !autoDetectedClassName) {
+          showAlert("danger", "Belum Scan Barcode", "Anda wajib melakukan scan Barcode yang tertempel di dalam ruangan kelas terlebih dahulu.");
+          return;
+        }
+        finalKelas = autoDetectedClassName;
+      } else {
+        finalKelas = document.getElementById("absenKelasManual").value;
+        if (!finalKelas) {
+          showAlert("warning", "Kelas Belum Dipilih", "Silakan pilih kelas mengajar Anda untuk absensi izin/sakit/alpa.");
           return;
         }
       }
 
       showLoading(true);
-      callBackend("submitAbsen", [currentUser.id, currentUser.nama, kelas, mapel, status, ket, 0, 0, verifiedClassCode], function(response) {
+      callBackend("submitAbsen", [currentUser.id, currentUser.nama, finalKelas, mapel, status, ket, 0, 0, verifiedClassCode || "-"], function(response) {
         showLoading(false);
         if (response.status === "success") {
           showAlert("success", "Absen Tersimpan", response.message);
-          document.getElementById("absenKelas").value = "";
           document.getElementById("absenMapel").value = "";
           document.getElementById("absenKeterangan").value = "";
+          document.getElementById("absenKelasManual").value = "";
           document.getElementsByName("absenStatus").forEach(r => r.checked = false);
           verifiedClassCode = null;
+          autoDetectedClassName = null;
           resetStatusQR();
           toggleKeteranganField('H');
         } else {
