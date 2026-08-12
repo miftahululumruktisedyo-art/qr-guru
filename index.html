@@ -169,7 +169,7 @@
           </button>
           <button onclick="switchAdminTab('bulanan')" class="admin-tab-btn px-4 py-2 bg-slate-200 text-slate-700 hover:bg-slate-300 text-sm font-semibold rounded-xl flex items-center space-x-1.5 transition">
             <i class="fa-solid fa-file-invoice"></i>
-            <span>Rekap Bulanan MTs & MA (Cetak)</span>
+            <span>Rekap Bulanan MTs, MA & Piket (Cetak)</span>
           </button>
         </div>
 
@@ -418,7 +418,7 @@
                 <i class="fa-solid fa-file-excel text-emerald-600"></i>
                 <span>Ekspor Rekap Bulanan Guru</span>
               </h3>
-              <p class="text-xs text-slate-500">Tampilan matriks kehadiran dilengkapi rekap H, I, S, A dan Poin yang terbagi berdasarkan Jenjang Madrasah.</p>
+              <p class="text-xs text-slate-500">Tampilan matriks kehadiran dilengkapi rekap H, I, S, A dan Poin yang terbagi berdasarkan Jenjang Madrasah (MTs/MA) atau kategori Guru Piket.</p>
             </div>
             
             <!-- Filter Periode Rekap -->
@@ -428,6 +428,7 @@
                 <select id="rekapJenjang" class="bg-white border border-slate-200 rounded-lg text-xs p-1 font-semibold text-blue-800 focus:outline-none">
                   <option value="MTS">MTs (Kelas 7, 8, 9)</option>
                   <option value="MA">MA (Kelas 10, 11, 12)</option>
+                  <option value="PIKET">Guru Piket</option>
                   <option value="ALL">Semua Tingkat</option>
                 </select>
               </div>
