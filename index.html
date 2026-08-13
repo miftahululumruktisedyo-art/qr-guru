@@ -139,15 +139,6 @@
             <i class="fa-solid fa-arrow-right-to-bracket"></i>
           </button>
         </form>
-
-        <!-- KONEKSI SPREADSHEET (APPS SCRIPT URL SETUP) -->
-        <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-          <button onclick="bukaModalApiUrl()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center justify-center space-x-1 mx-auto">
-            <i class="fa-solid fa-link"></i>
-            <span>Atur / Ubah Link Web App Spreadsheet</span>
-          </button>
-          <p id="labelStatusKoneksi" class="text-[10px] text-slate-400 mt-1 italic"></p>
-        </div>
       </section>
 
       <!-- VIEW 2: DASHBOARD ADMIN -->
@@ -275,7 +266,7 @@
               <i class="fa-solid fa-qrcode text-indigo-600"></i>
               <span>Buat Kelas & QR Code</span>
             </h3>
-            <p class="text-xs text-slate-500 mt-1">Buat daftar kelas sekolah dan cetak poster QR Code untuk ditempel di ruangan kelas. Anda dapat mencetak ulang QR Code kapan saja dari daftar kelas tersimpan.</p>
+            <p class="text-xs text-slate-500 mt-1">Buat daftar kelas sekolah (atau ketik PIKET) dan cetak poster QR Code untuk ditempel di ruangan kelas. Anda dapat mencetak ulang QR Code kapan saja dari daftar kelas tersimpan.</p>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -285,10 +276,10 @@
               <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-3">
                 <h4 class="text-xs font-bold uppercase text-slate-700 flex items-center space-x-1.5">
                   <i class="fa-solid fa-plus-circle text-indigo-600"></i>
-                  <span>Tambah Kelas Baru</span>
+                  <span>Tambah Kelas Baru / Ruang Piket</span>
                 </h4>
                 <form onsubmit="tambahKelasAdmin(event)" class="flex flex-col sm:flex-row gap-2">
-                  <input type="text" id="inputKelasBaru" required placeholder="Contoh: 7A, 8B, atau 10A" class="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <input type="text" id="inputKelasBaru" required placeholder="Contoh: 7A, 8B, atau PIKET" class="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl shadow transition text-xs flex items-center justify-center space-x-1 whitespace-nowrap">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     <span>Buat & Simpan Kelas</span>
@@ -300,14 +291,14 @@
               <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
                 <h4 class="text-xs font-bold uppercase text-slate-700 flex items-center space-x-1.5">
                   <i class="fa-solid fa-list-check text-emerald-600"></i>
-                  <span>Daftar Kelas Tersimpan</span>
+                  <span>Daftar Kelas & Piket Tersimpan</span>
                 </h4>
                 <div class="overflow-x-auto">
                   <table class="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr class="bg-slate-100 text-slate-600 uppercase tracking-wider">
                         <th class="p-2.5 border-b w-12 text-center">No</th>
-                        <th class="p-2.5 border-b">Nama Kelas</th>
+                        <th class="p-2.5 border-b">Nama Kelas / Ruang</th>
                         <th class="p-2.5 border-b">Kode Barcode</th>
                         <th class="p-2.5 border-b text-center">Aksi</th>
                       </tr>
@@ -324,7 +315,7 @@
             <div class="lg:col-span-5 flex justify-center">
               <div id="printArea" class="bg-white border-2 border-slate-800 rounded-2xl p-6 text-center max-w-sm w-full shadow-lg">
                 <div class="border-b-2 border-slate-800 pb-3 mb-4">
-                  <p class="text-[10px] font-bold tracking-widest text-slate-500 uppercase">KARTU PRESENSI KELAS</p>
+                  <p class="text-[10px] font-bold tracking-widest text-slate-500 uppercase">KARTU PRESENSI KELAS / PIKET</p>
                   <h2 class="text-xl font-black text-slate-900 font-school">MTs SA & MA MIFTAHUL ULUM</h2>
                 </div>
                 
@@ -418,16 +409,17 @@
                 <i class="fa-solid fa-file-excel text-emerald-600"></i>
                 <span>Ekspor Rekap Bulanan Guru</span>
               </h3>
-              <p class="text-xs text-slate-500">Tampilan matriks kehadiran dilengkapi rekap H, I, S, A dan Poin yang terbagi berdasarkan Jenjang Madrasah.</p>
+              <p class="text-xs text-slate-500">Tampilan matriks kehadiran dilengkapi rekap H, I, S, A dan Poin yang terbagi berdasarkan Jenjang Madrasah & Piket.</p>
             </div>
             
             <!-- Filter Periode Rekap -->
             <div class="flex flex-wrap items-center gap-3 mt-3 md:mt-0 bg-slate-50 p-2 rounded-xl border border-slate-100">
               <div>
-                <label class="block text-[10px] uppercase font-bold text-slate-500">Jenjang Sekolah</label>
+                <label class="block text-[10px] uppercase font-bold text-slate-500">Kategori / Jenjang</label>
                 <select id="rekapJenjang" class="bg-white border border-slate-200 rounded-lg text-xs p-1 font-semibold text-blue-800 focus:outline-none">
                   <option value="MTS">MTs (Kelas 7, 8, 9)</option>
                   <option value="MA">MA (Kelas 10, 11, 12)</option>
+                  <option value="PIKET">Guru Piket</option>
                   <option value="ALL">Semua Tingkat</option>
                 </select>
               </div>
@@ -476,7 +468,7 @@
           <!-- PRATINJAU MATRIKS REKAP BULANAN EXCEL-STYLE -->
           <div id="rekapContainerExcel" class="table-container overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-inner p-4">
             <div id="excelGridPreview" class="min-w-[1200px]">
-              <p class="text-slate-400 text-center py-10 text-sm">Pilih Jenjang, Bulan & Tahun lalu klik "Tampilkan" untuk melihat grid rekap.</p>
+              <p class="text-slate-400 text-center py-10 text-sm">Pilih Kategori, Bulan & Tahun lalu klik "Tampilkan" untuk melihat grid rekap.</p>
             </div>
           </div>
         </div>
@@ -496,7 +488,7 @@
             <div class="flex-1">
               <h4 class="text-xs font-bold uppercase text-slate-400">Status Scan Barcode Kelas</h4>
               <p id="qrStatusText" class="text-sm font-semibold text-slate-700">Belum Discan</p>
-              <p id="qrDescText" class="text-[11px] text-slate-500">Scan Barcode yang ada di ruangan kelas mengajar Anda.</p>
+              <p id="qrDescText" class="text-[11px] text-slate-500">Scan Barcode yang ada di ruangan kelas/piket.</p>
             </div>
           </div>
 
@@ -521,7 +513,7 @@
                 <i class="fa-solid fa-camera text-indigo-600"></i>
                 <span>Kamera Scan Barcode Kelas</span>
               </h3>
-              <p class="text-xs text-slate-500">Arahkan kamera ke poster QR Code yang tertempel di dinding kelas.</p>
+              <p class="text-xs text-slate-500">Arahkan kamera ke poster QR Code di dinding kelas atau ruang piket.</p>
             </div>
             <button id="btnToggleCamera" onclick="toggleCameraScanner()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition flex items-center space-x-1">
               <i class="fa-solid fa-camera"></i>
@@ -532,7 +524,7 @@
           <!-- CONTAINER VIDEO KAMERA -->
           <div id="scannerWrapper" class="hidden flex-col items-center justify-center bg-slate-900 rounded-2xl p-3 overflow-hidden">
             <div id="qr-reader" class="w-full max-w-md"></div>
-            <p class="text-[11px] text-slate-300 mt-2 text-center">Pastikan QR Code kelas terlihat jelas di dalam kotak penemu.</p>
+            <p class="text-[11px] text-slate-300 mt-2 text-center">Pastikan QR Code kelas/piket terlihat jelas di dalam kotak penemu.</p>
           </div>
         </div>
 
@@ -546,14 +538,14 @@
           <form onsubmit="submitFormAbsen(event)" class="space-y-5">
             <!-- TAMPILAN KELAS OTOMATIS HASIL SCAN (UNTUK HADIR) / INPUT MANUAL (UNTUK NON-HADIR) -->
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-1">Kelas Mengajar</label>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Kelas / Ruang Mengajar</label>
               <div id="wrapperKelasAuto" class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 flex items-center justify-between">
-                <span class="text-xs font-semibold text-indigo-900">Kelas Terdeteksi Barcode:</span>
+                <span class="text-xs font-semibold text-indigo-900">Terdeteksi Barcode:</span>
                 <span id="textKelasTerdeteksi" class="font-black text-indigo-700 text-base">Belum Scan Barcode</span>
               </div>
               <div id="wrapperKelasManual" class="hidden mt-2">
                 <select id="absenKelasManual" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="" disabled selected>-- Pilih Kelas Mengajar (Izin/Sakit/Alpa) --</option>
+                  <option value="" disabled selected>-- Pilih Kelas/Ruang Mengajar (Izin/Sakit/Alpa) --</option>
                   <!-- Dipopulasikan via JS -->
                 </select>
               </div>
@@ -561,7 +553,7 @@
 
             <!-- INPUT MATA PELAJARAN -->
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-1">Pilih Mata Pelajaran</label>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Pilih Mata Pelajaran (Atau Piket)</label>
               <select id="absenMapel" required class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               </select>
             </div>
@@ -578,13 +570,13 @@
                   </div>
                   <div>
                     <p class="text-xs font-bold text-emerald-900">HADIR (Otomatis)</p>
-                    <p id="textStatusHadirDetail" class="text-[10px] text-emerald-700">Scan Barcode di kelas untuk mengonfirmasi kehadiran secara otomatis.</p>
+                    <p id="textStatusHadirDetail" class="text-[10px] text-emerald-700">Scan Barcode untuk mengonfirmasi kehadiran secara otomatis.</p>
                   </div>
                 </div>
                 <span class="bg-emerald-200 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap">Otomatis Barcode</span>
               </div>
 
-              <p class="text-[11px] text-slate-500 mb-2 font-medium">Atau pilih opsi di bawah hanya jika Anda berhalangan hadir di kelas:</p>
+              <p class="text-[11px] text-slate-500 mb-2 font-medium">Atau pilih opsi di bawah hanya jika Anda berhalangan hadir:</p>
 
               <!-- PILIHAN HANYA UNTUK NON-HADIR (IZIN / SAKIT / ALPA) -->
               <div class="grid grid-cols-3 gap-3">
@@ -637,34 +629,13 @@
     </div>
   </footer>
 
-  <!-- MODAL: KONFIGURASI WEB APP URL (PENGHUBUNG GOOGLE SHEETS) -->
-  <div id="modalApiUrl" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100 p-6 space-y-4 text-xs">
-      <div class="flex items-center space-x-3 text-indigo-600">
-        <i class="fa-solid fa-link text-3xl"></i>
-        <div>
-          <h3 class="font-bold text-sm text-slate-800">Koneksi Google Sheets (Web App)</h3>
-          <p class="text-slate-500 mt-0.5">Masukkan URL Web App hasil Deploy Google Apps Script Anda untuk menghubungkan web ini ke Google Sheets.</p>
-        </div>
-      </div>
-      <div>
-        <label class="block font-semibold text-slate-600 mb-1 uppercase">URL Web App Google Apps Script</label>
-        <input type="url" id="inputApiUrl" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-slate-700 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="https://script.google.com/macros/s/.../exec">
-      </div>
-      <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="closeModalApiUrl()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl transition">Batal</button>
-        <button onclick="simpanApiUrl()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl shadow transition">Simpan Koneksi</button>
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL: EDIT KELAS ADMIN -->
   <div id="modalEditKelas" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-slate-100">
       <div class="bg-gradient-to-r from-indigo-700 to-blue-800 text-white p-4 flex justify-between items-center">
         <h3 class="font-bold text-sm flex items-center space-x-2">
           <i class="fa-solid fa-pen-to-square"></i>
-          <span>Ubah Nama Kelas</span>
+          <span>Ubah Nama Kelas / Ruang</span>
         </h3>
         <button onclick="closeModalEditKelas()" class="text-white/80 hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
@@ -674,7 +645,7 @@
         <input type="hidden" id="editKelasOldName">
         <div>
           <label class="block font-semibold text-slate-600 mb-1">Nama / Kode Kelas Baru</label>
-          <input type="text" id="editKelasNewName" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-slate-700 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="Contoh: 7A">
+          <input type="text" id="editKelasNewName" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-slate-700 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="Contoh: 7A atau PIKET">
         </div>
         <div class="flex justify-end space-x-2 pt-2">
           <button type="button" onclick="closeModalEditKelas()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl transition">Batal</button>
@@ -719,7 +690,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-semibold text-slate-600 mb-1">Kelas Mengajar</label>
-            <input type="text" id="editKelas" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="Contoh: 7A">
+            <input type="text" id="editKelas" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="Contoh: 7A atau PIKET">
           </div>
           <div>
             <label class="block font-semibold text-slate-600 mb-1">Mata Pelajaran</label>
@@ -821,7 +792,7 @@
     </div>
   </div>
 
-  <!-- LOADING OVERLAY -->
+    <!-- LOADING OVERLAY -->
   <div id="loadingOverlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center flex-col space-y-3">
     <div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-indigo-600"></div>
     <span class="text-white font-semibold text-sm">Menghubungkan ke Server Google...</span>
@@ -835,10 +806,10 @@
      * =========================================================================
      * Tempelkan URL Web App hasil Deploy Google Apps Script Anda di dalam tanda kutip bawah ini
      */
-    const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxtE9Qh9K1m2eiAvDwBeGbzZD9qTuHMTgGNGFK1mZIT12xth9xwfEvqtjgI6Z2dQa0B/exec"; 
+    const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC727UShrtueHU4Fk0rKDQqxqIdE-AsDvDlnYLLy1YEi5L-a_k9R62Zz_Z0UtbgpgO/exec"; 
 
-    // Daftar Kelas Bawaan
-    const DEFAULT_KELAS_LIST = ["7A", "7B", "8A", "8B", "9A", "9B", "10A", "10B", "11A", "11B", "12A", "12B"];
+    // Daftar Kelas Bawaan (Ditambah "PIKET" secara default)
+    const DEFAULT_KELAS_LIST = ["7A", "7B", "8A", "8B", "9A", "9B", "10A", "10B", "11A", "11B", "12A", "12B", "PIKET"];
 
     // State Global
     let currentUser = null;
@@ -850,8 +821,8 @@
     let onConfirmCallback = null;
     let masterKelasAdmin = [...DEFAULT_KELAS_LIST];
     
-    // Inisialisasi URL API (Mendahulukan DEFAULT_WEB_APP_URL, lalu LocalStorage)
-    let webAppUrl = DEFAULT_WEB_APP_URL || localStorage.getItem("GAS_WEB_APP_URL") || "";
+    // Inisialisasi URL API 
+    let webAppUrl = DEFAULT_WEB_APP_URL || "";
 
     /**
      * Hybrid API Dispatcher
@@ -895,11 +866,11 @@
     function simulateMock(actionName, paramsArray, onSuccess) {
       console.warn("[MOCK] Simulasi backend tanpa URL Web App:", actionName);
       setTimeout(() => {
-        if (actionName === "getConfig") onSuccess({ SESI_1: "07:00-08:00", SESI_2: "09:30-10:00", DAFTAR_KELAS_MASTER: "7A, 7B, 8A, 8B, 9A, 9B, 10A, 10B, 11A, 12A" });
+        if (actionName === "getConfig") onSuccess({ SESI_1: "07:00-08:00", SESI_2: "09:30-10:00", DAFTAR_KELAS_MASTER: "7A, 7B, 8A, 8B, 9A, 9B, 10A, 10B, 11A, 12A, PIKET" });
         else if (actionName === "loginUser") {
           const u = paramsArray[0], p = paramsArray[1];
           if (u === "admin" && p === "1234") onSuccess({ status: "success", role: "admin", user: { nama: "Anwar Mahmudi, S.Pd", username: "admin" } });
-          else onSuccess({ status: "success", role: "guru", user: { id: "G-001", nama: "Budi Santoso, S.Pd", mapel: ["Matematika", "IPA"], username: u } });
+          else onSuccess({ status: "success", role: "guru", user: { id: "G-001", nama: "Budi Santoso, S.Pd", mapel: ["Matematika", "IPA", "Piket"], username: u } });
         } else if (actionName === "checkCurrentSession") onSuccess({ active: true, sessionName: "SESI 1", timeRange: "07:00-08:00" });
         else if (actionName === "getDaftarGuru") onSuccess([
           { id: "G-001", nama: "Budi Santoso, S.Pd", mapel: "Matematika", username: "budis", password: "123" },
@@ -911,44 +882,9 @@
     }
 
     window.onload = function() {
-      updateStatusKoneksiUI();
       muatKonfigurasi();
       setupConfirmDialogListeners();
     };
-
-    function updateStatusKoneksiUI() {
-      const label = document.getElementById("labelStatusKoneksi");
-      if (webAppUrl && webAppUrl.startsWith("http")) {
-        label.className = "text-[10px] text-emerald-600 font-semibold mt-1";
-        label.innerHTML = '<i class="fa-solid fa-circle-check"></i> Terhubung ke Web App Google Sheets';
-      } else {
-        label.className = "text-[10px] text-amber-600 font-semibold mt-1";
-        label.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Link Web App Belum Diisi (Mode Simulasi)';
-      }
-    }
-
-    function bukaModalApiUrl() {
-      document.getElementById("inputApiUrl").value = webAppUrl;
-      document.getElementById("modalApiUrl").classList.remove("hidden");
-    }
-
-    function closeModalApiUrl() {
-      document.getElementById("modalApiUrl").classList.add("hidden");
-    }
-
-    function simpanApiUrl() {
-      const url = document.getElementById("inputApiUrl").value.trim();
-      if (url && !url.startsWith("http")) {
-        showAlert("danger", "URL Tidak Valid", "URL Web App harus diawali dengan http:// atau https://");
-        return;
-      }
-      webAppUrl = url;
-      localStorage.setItem("GAS_WEB_APP_URL", webAppUrl);
-      closeModalApiUrl();
-      updateStatusKoneksiUI();
-      showAlert("success", "Koneksi Tersimpan", "Link Web App Google Sheets berhasil diperbarui!");
-      muatKonfigurasi();
-    }
 
     function setupConfirmDialogListeners() {
       const modal = document.getElementById("modalConfirm");
@@ -1157,7 +1093,7 @@
       }
 
       showLoading(true);
-      callBackend("updateConfig", ["-", "100", sessionsObj], function(success) {
+      callBackend("updateConfig", [sessionsObj], function(success) {
         showLoading(false);
         if (success) {
           for (let k in configGlobal) { if (k.startsWith("SESI_")) delete configGlobal[k]; }
@@ -1181,7 +1117,7 @@
       }
 
       if (masterKelasAdmin.includes(namaKelasBaru)) {
-        showAlert("warning", "Kelas Sudah Ada", `Kelas ${namaKelasBaru} sudah tersimpan di daftar kelas.`);
+        showAlert("warning", "Kelas Sudah Ada", `Kelas/Ruang ${namaKelasBaru} sudah tersimpan di daftar.`);
         generateQRCodeKelas(namaKelasBaru);
         return;
       }
@@ -1195,7 +1131,7 @@
         configGlobal.DAFTAR_KELAS_MASTER = masterKelasAdmin.join(", ");
         renderTabelKelasAdmin();
         generateQRCodeKelas(namaKelasBaru);
-        showAlert("success", "Kelas Berhasil Dibuat", `Kelas ${namaKelasBaru} tersimpan dan QR Code siap dicetak!`);
+        showAlert("success", "Kelas Berhasil Dibuat", `${namaKelasBaru} tersimpan dan QR Code siap dicetak!`);
       });
     }
 
@@ -1214,11 +1150,14 @@
       }
 
       masterKelasAdmin.forEach((k, idx) => {
+        let labelKelas = `Kelas ${k}`;
+        if(k === "PIKET") labelKelas = "Ruang PIKET";
+
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-50 transition";
         tr.innerHTML = `
           <td class="p-2.5 text-center font-bold text-slate-500">${idx + 1}</td>
-          <td class="p-2.5 font-bold text-indigo-700">Kelas ${k}</td>
+          <td class="p-2.5 font-bold text-indigo-700">${labelKelas}</td>
           <td class="p-2.5 font-mono text-[10px] text-slate-500">ABSEN_KELAS_${k}</td>
           <td class="p-2.5 text-center flex justify-center space-x-1.5">
             <button onclick="generateQRCodeKelas('${k}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold px-2 py-1 rounded text-[10px] transition flex items-center space-x-1" title="Pratinjau / Cetak QR Code">
@@ -1257,7 +1196,7 @@
       const newName = document.getElementById("editKelasNewName").value.trim().toUpperCase();
 
       if (!newName) {
-        showAlert("warning", "Nama Kelas Kosong", "Masukkan nama kelas baru.");
+        showAlert("warning", "Nama Kosong", "Masukkan nama kelas baru.");
         return;
       }
 
@@ -1274,7 +1213,7 @@
         configGlobal.DAFTAR_KELAS_MASTER = masterKelasAdmin.join(", ");
         renderTabelKelasAdmin();
         generateQRCodeKelas(newName);
-        showAlert("success", "Kelas Diperbarui", `Nama kelas ${oldName} berhasil diubah menjadi ${newName}.`);
+        showAlert("success", "Kelas Diperbarui", `Nama ${oldName} berhasil diubah menjadi ${newName}.`);
       });
     }
 
@@ -1284,7 +1223,7 @@
     function hapusKelasAdmin(className) {
       triggerCustomConfirm(
         "Hapus Kelas Tersimpan",
-        `Apakah Anda yakin ingin menghapus Kelas ${className}? Poster QR Code kelas ini tidak dapat diverifikasi lagi setelah dihapus.`,
+        `Apakah Anda yakin ingin menghapus ${className}? Poster QR Code ruangan ini tidak dapat diverifikasi lagi setelah dihapus.`,
         function() {
           masterKelasAdmin = masterKelasAdmin.filter(k => k !== className);
           showLoading(true);
@@ -1297,7 +1236,7 @@
             } else {
               document.getElementById("qrcodeContainer").innerHTML = '<p class="text-slate-400 text-xs italic">Belum ada kelas.</p>';
             }
-            showAlert("success", "Kelas Terhapus", `Kelas ${className} berhasil dihapus dari daftar tersimpan.`);
+            showAlert("success", "Terhapus", `${className} berhasil dihapus dari daftar tersimpan.`);
           });
         }
       );
@@ -1312,7 +1251,10 @@
       const cleanClass = className.toUpperCase().trim().replace(/\s+/g, ' ');
       const payloadString = `ABSEN_KELAS_${cleanClass}`;
 
-      document.getElementById("previewNamaKelas").innerText = `KELAS ${cleanClass}`;
+      let labelJudul = `KELAS ${cleanClass}`;
+      if(cleanClass === "PIKET") labelJudul = "RUANG PIKET";
+
+      document.getElementById("previewNamaKelas").innerText = labelJudul;
       document.getElementById("previewPayloadString").innerText = payloadString;
 
       const container = document.getElementById("qrcodeContainer");
@@ -1338,7 +1280,7 @@
       if (!isRendered) {
         const img = document.createElement("img");
         img.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadString)}`;
-        img.alt = `QR Code Kelas ${cleanClass}`;
+        img.alt = `QR Code ${cleanClass}`;
         img.className = "w-[180px] h-[180px] mx-auto rounded-lg shadow-sm border border-slate-200";
         container.appendChild(img);
       }
@@ -1751,11 +1693,12 @@
 
       // Mengisi Dropdown Kelas Manual untuk Opsi Izin/Sakit/Alpa
       const kelasManualSelect = document.getElementById("absenKelasManual");
-      kelasManualSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Mengajar (Izin/Sakit/Alpa) --</option>';
+      kelasManualSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas/Ruang (Izin/Sakit/Alpa) --</option>';
       masterKelasAdmin.forEach(k => {
         const opt = document.createElement("option");
         opt.value = k;
-        opt.innerText = `Kelas ${k}`;
+        if(k === "PIKET") opt.innerText = "Ruang PIKET";
+        else opt.innerText = `Kelas ${k}`;
         kelasManualSelect.appendChild(opt);
       });
 
@@ -1779,7 +1722,7 @@
       icon.className = "p-3 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center";
       icon.innerHTML = '<i class="fa-solid fa-qrcode text-xl"></i>';
       title.innerText = "Belum Discan";
-      desc.innerText = "Silakan klik Buka Kamera untuk scan Barcode di kelas.";
+      desc.innerText = "Silakan klik Buka Kamera untuk scan Barcode di ruangan.";
       
       document.getElementById("textKelasTerdeteksi").innerText = "Belum Scan Barcode";
       document.getElementById("textKelasTerdeteksi").className = "font-black text-indigo-400 text-base";
@@ -1787,7 +1730,7 @@
       const boxHadir = document.getElementById("statusHadirOtomatisBox");
       if (boxHadir) {
         boxHadir.className = "bg-emerald-50/60 border-2 border-slate-200 rounded-xl p-3 mb-3 flex items-center justify-between transition-all";
-        document.getElementById("textStatusHadirDetail").innerText = "Scan Barcode di kelas untuk mengonfirmasi kehadiran secara otomatis.";
+        document.getElementById("textStatusHadirDetail").innerText = "Scan Barcode untuk mengonfirmasi kehadiran secara otomatis.";
       }
     }
 
@@ -1901,6 +1844,9 @@
         verifiedClassCode = scannedClean;
         autoDetectedClassName = detectedClass;
         
+        let labelDeteksi = `Kelas ${detectedClass}`;
+        if(detectedClass === "PIKET") labelDeteksi = "Ruang PIKET";
+
         // Batalkan pilihan radio non-hadir jika ada yang terhubung
         const radios = document.getElementsByName("absenStatus");
         radios.forEach(r => r.checked = false);
@@ -1914,20 +1860,20 @@
         card.className = "bg-emerald-50 rounded-2xl border border-emerald-200 p-4 shadow-sm flex items-center space-x-4";
         icon.className = "p-3 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center";
         icon.innerHTML = '<i class="fa-solid fa-circle-check text-xl"></i>';
-        title.innerHTML = `<span class="text-emerald-800 font-bold">Terverifikasi (Kelas ${detectedClass})</span>`;
-        desc.innerText = "✓ Barcode kelas cocok. Status HADIR terkonfirmasi secara otomatis!";
+        title.innerHTML = `<span class="text-emerald-800 font-bold">Terverifikasi (${labelDeteksi})</span>`;
+        desc.innerText = "✓ Barcode ruangan cocok. Status HADIR terkonfirmasi secara otomatis!";
 
         const labelKelas = document.getElementById("textKelasTerdeteksi");
-        labelKelas.innerText = `Kelas ${detectedClass}`;
+        labelKelas.innerText = labelDeteksi;
         labelKelas.className = "font-black text-emerald-700 text-base";
 
         const boxHadir = document.getElementById("statusHadirOtomatisBox");
         if (boxHadir) {
           boxHadir.className = "bg-emerald-50 border-2 border-emerald-500 rounded-xl p-3 mb-3 flex items-center justify-between transition-all";
-          document.getElementById("textStatusHadirDetail").innerText = `Terkonfirmasi HADIR otomatis untuk Kelas ${detectedClass}.`;
+          document.getElementById("textStatusHadirDetail").innerText = `Terkonfirmasi HADIR otomatis untuk ${labelDeteksi}.`;
         }
 
-        showAlert("success", "Scan Barcode Berhasil!", `Kelas ${detectedClass} terdeteksi. Status Anda terkonfirmasi HADIR secara otomatis.`);
+        showAlert("success", "Scan Barcode Berhasil!", `${labelDeteksi} terdeteksi. Status Anda terkonfirmasi HADIR secara otomatis.`);
       } else {
         verifiedClassCode = null;
         autoDetectedClassName = null;
@@ -2008,10 +1954,11 @@
         if (boxHadir) {
           if (verifiedClassCode && autoDetectedClassName) {
             boxHadir.className = "bg-emerald-50 border-2 border-emerald-500 rounded-xl p-3 mb-3 flex items-center justify-between transition-all";
-            document.getElementById("textStatusHadirDetail").innerText = `Terkonfirmasi HADIR otomatis untuk Kelas ${autoDetectedClassName}.`;
+            let label = autoDetectedClassName === "PIKET" ? "Ruang PIKET" : `Kelas ${autoDetectedClassName}`;
+            document.getElementById("textStatusHadirDetail").innerText = `Terkonfirmasi HADIR otomatis untuk ${label}.`;
           } else {
             boxHadir.className = "bg-emerald-50/60 border-2 border-slate-200 rounded-xl p-3 mb-3 flex items-center justify-between transition-all";
-            document.getElementById("textStatusHadirDetail").innerText = "Scan Barcode di kelas untuk mengonfirmasi kehadiran secara otomatis.";
+            document.getElementById("textStatusHadirDetail").innerText = "Scan Barcode untuk mengonfirmasi kehadiran secara otomatis.";
           }
         }
       }
@@ -2034,7 +1981,7 @@
         if (verifiedClassCode && autoDetectedClassName) {
           status = "H";
         } else {
-          showAlert("danger", "Belum Scan Barcode", "Anda belum melakukan scan Barcode Kelas. Silakan scan Barcode untuk terkonfirmasi HADIR, atau pilih status Izin/Sakit/Alpa.");
+          showAlert("danger", "Belum Scan Barcode", "Anda belum melakukan scan Barcode ruangan. Silakan scan Barcode untuk terkonfirmasi HADIR, atau pilih status Izin/Sakit/Alpa.");
           return;
         }
       }
@@ -2043,20 +1990,20 @@
 
       if (status === "H") {
         if (!verifiedClassCode || !autoDetectedClassName) {
-          showAlert("danger", "Belum Scan Barcode", "Anda wajib melakukan scan Barcode yang tertempel di dalam ruangan kelas terlebih dahulu.");
+          showAlert("danger", "Belum Scan Barcode", "Anda wajib melakukan scan Barcode yang tertempel di ruangan terlebih dahulu.");
           return;
         }
         finalKelas = autoDetectedClassName;
       } else {
         finalKelas = document.getElementById("absenKelasManual").value;
         if (!finalKelas) {
-          showAlert("warning", "Kelas Belum Dipilih", "Silakan pilih kelas mengajar Anda untuk absensi izin/sakit/alpa.");
+          showAlert("warning", "Ruangan Belum Dipilih", "Silakan pilih kelas/ruang piket Anda untuk absensi izin/sakit/alpa.");
           return;
         }
       }
 
       showLoading(true);
-      callBackend("submitAbsen", [currentUser.id, currentUser.nama, finalKelas, mapel, status, ket, 0, 0, verifiedClassCode || "-"], function(response) {
+      callBackend("submitAbsen", [currentUser.id, currentUser.nama, finalKelas, mapel, status, ket, verifiedClassCode || "-"], function(response) {
         showLoading(false);
         if (response.status === "success") {
           showAlert("success", "Absen Tersimpan", response.message);
