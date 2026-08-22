@@ -814,7 +814,7 @@
      * =========================================================================
      * Tempelkan URL Web App hasil Deploy Google Apps Script Anda di dalam tanda kutip bawah ini
      */
-    const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwYQfKOsY333k1_47l_7a6eVQUMtjm4AyP3I1QYkZpkIxYCqlYEJl7rzmXfEmmyjz_u/exec"; 
+    const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzUWfwY1Q8C9SGB_8XnuUeFVK0VnmbKEZXMKroujNolGyPveyHQBhGxEq64_kL6AnEl/exec"; 
 
     // Daftar Kelas Bawaan (Ditambah "PIKET" secara default)
     const DEFAULT_KELAS_LIST = ["7A", "7B", "8A", "8B", "9A", "9B", "10A", "10B", "11A", "11B", "12A", "12B", "PIKET"];
@@ -1692,13 +1692,113 @@
         return;
       }
       const data = rekapDataTerakhir;
-      let tableHtml = document.getElementById("excelGridPreview").innerHTML;
+
+      // Membangun ulang tabel dengan inline style (identik tampilan di aplikasi)
+      // karena class Tailwind tidak ikut terbawa saat dibuka di Excel.
+      let bodyRows = "";
+      if (!data.listGuru || data.listGuru.length === 0) {
+        bodyRows = `<tr><td colspan="40" style="border:1px solid #000;padding:14px;text-align:center;font-style:italic;color:#94a3b8;">Tidak ada data guru.</td></tr>`;
+      } else {
+        data.listGuru.forEach((guru, idx) => {
+          const detail = data.rekap[guru.id];
+          let dayCells = "";
+          for (let i = 1; i <= 31; i++) {
+            const status = (detail && detail.tanggal) ? (detail.tanggal[i] || "") : "";
+            let bg = "#ffffff", color = "#0f172a";
+            if (status.includes("H")) { bg = "#ecfdf5"; color = "#065f46"; }
+            else if (status.includes("I")) { bg = "#fffbeb"; color = "#92400e"; }
+            else if (status.includes("S")) { bg = "#eff6ff"; color = "#1d4ed8"; }
+            else if (status.includes("A")) { bg = "#fef2f2"; color = "#b91c1c"; }
+            dayCells += `<td style="border:1px solid #000;text-align:center;padding:1px 2px;font-weight:600;background:${bg};color:${color};">${status}</td>`;
+          }
+          const jml = (detail && detail.jumlah) ? detail.jumlah : { H: 0, I: 0, S: 0, A: 0 };
+          const poin = detail ? (detail.totalPoin || 0) : 0;
+          bodyRows += `
+            <tr>
+              <td colspan="2" style="border:1px solid #000;text-align:center;padding:1px 2px;font-weight:600;color:#1e293b;">${idx + 1}</td>
+              <td colspan="2" style="border:1px solid #000;text-align:left;padding:2px 6px;font-weight:700;color:#0f172a;white-space:nowrap;">${guru.nama}</td>
+              ${dayCells}
+              <td style="border:1px solid #000;text-align:center;padding:1px 2px;font-weight:800;background:#ecfdf5;color:#047857;">${jml.H || 0}</td>
+              <td style="border:1px solid #000;text-align:center;padding:1px 2px;font-weight:800;background:#fffbeb;color:#b45309;">${jml.I || 0}</td>
+              <td style="border:1px solid #000;text-align:center;padding:1px 2px;font-weight:800;background:#eff6ff;color:#1d4ed8;">${jml.S || 0}</td>
+              <td style="border:1px solid #000;text-align:center;padding:1px 2px;font-weight:800;background:#fef2f2;color:#b91c1c;">${jml.A || 0}</td>
+              <td style="border:1px solid #000;text-align:center;padding:1px 2px;font-weight:900;background:#eef2ff;color:#4338ca;">${poin}</td>
+            </tr>`;
+        });
+      }
+
+      const dayHeaderCells = Array.from({length: 31}, (_, i) =>
+        `<th style="border:1px solid #000;background:#f8fafc;padding:1px 2px;font-weight:600;width:18px;">${i+1}</th>`
+      ).join('');
+
+      const tableHtml = `
+        <table style="border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:9px;width:100%;">
+          <thead>
+            <tr>
+              <th colspan="2" style="border:1px solid #000;background:#f1f5f9;padding:2px 4px;text-align:left;font-weight:700;font-size:10px;">NO</th>
+              <th colspan="2" style="border:1px solid #000;background:#f1f5f9;padding:2px 8px;text-align:left;font-weight:700;font-size:10px;">NAMA</th>
+              <th colspan="31" style="border:1px solid #000;background:#f1f5f9;padding:2px;font-weight:700;font-size:10px;letter-spacing:1px;">${data.jenjang} - ${data.bulan} (${data.tahun})</th>
+              <th colspan="4" style="border:1px solid #000;background:#fffbeb;padding:2px;font-weight:700;font-size:10px;">REKAP ABSEN</th>
+              <th style="border:1px solid #000;background:#e0e7ff;padding:2px;font-weight:700;font-size:10px;">TOTAL</th>
+            </tr>
+            <tr>
+              <th colspan="2" style="border:1px solid #000;background:#f8fafc;"></th>
+              <th colspan="2" style="border:1px solid #000;background:#f8fafc;"></th>
+              ${dayHeaderCells}
+              <th style="border:1px solid #000;background:#d1fae5;padding:1px 2px;font-weight:700;color:#065f46;width:18px;">H</th>
+              <th style="border:1px solid #000;background:#fef3c7;padding:1px 2px;font-weight:700;color:#92400e;width:18px;">I</th>
+              <th style="border:1px solid #000;background:#dbeafe;padding:1px 2px;font-weight:700;color:#1e40af;width:18px;">S</th>
+              <th style="border:1px solid #000;background:#fee2e2;padding:1px 2px;font-weight:700;color:#991b1b;width:18px;">A</th>
+              <th style="border:1px solid #000;background:#eef2ff;padding:1px 4px;font-weight:700;color:#3730a3;">Poin</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bodyRows}
+          </tbody>
+        </table>
+      `;
+
       const template = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head><meta charset="utf-8"></head>
-        <body style="margin:20px;">
-          <h3>REKAP PRESENSI GURU - ${data.jenjang} (${data.bulan} ${data.tahun})</h3>
-          ${tableHtml}
+        <head>
+          <meta charset="utf-8">
+          <!--[if gte mso 9]>
+          <xml>
+            <x:ExcelWorkbook>
+              <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                  <x:Name>Rekap</x:Name>
+                  <x:WorksheetOptions>
+                    <x:PageSetup>
+                      <x:Layout x:Orientation="Landscape"/>
+                      <x:PaperSizeIndex>14</x:PaperSizeIndex>
+                      <x:FitToPage/>
+                      <x:Print>
+                        <x:FitWidth>1</x:FitWidth>
+                        <x:FitHeight>0</x:FitHeight>
+                        <x:PaperSizeIndex>14</x:PaperSizeIndex>
+                      </x:Print>
+                    </x:PageSetup>
+                    <x:Selected/>
+                    <x:ProtectContents>False</x:ProtectContents>
+                    <x:ProtectObjects>False</x:ProtectObjects>
+                    <x:ProtectScenarios>False</x:ProtectScenarios>
+                  </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+              </x:ExcelWorksheets>
+            </x:ExcelWorkbook>
+          </xml>
+          <![endif]-->
+          <style>
+            @page Section1 { size: 215mm 330mm; mso-page-orientation: landscape; margin: 1cm 0.8cm; }
+            div.Section1 { page: Section1; }
+          </style>
+        </head>
+        <body style="margin:16px;">
+          <div class="Section1">
+            <h3 style="font-family:Arial,Helvetica,sans-serif;color:#0f172a;margin:0 0 8px 0;">REKAP PRESENSI GURU - ${data.jenjang} (${data.bulan} ${data.tahun})</h3>
+            ${tableHtml}
+          </div>
         </body>
         </html>
       `;
@@ -1710,7 +1810,7 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showAlert("success", "File Berhasil Diunduh", `Berhasil mengunduh dokumen Excel.`);
+      showAlert("success", "File Berhasil Diunduh", `Berhasil mengunduh dokumen Excel siap cetak (F4 Landscape).`);
     }
 
     /* =========================================================================
