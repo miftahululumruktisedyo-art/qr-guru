@@ -428,7 +428,7 @@
                   <option value="MTS">MTs (Kelas 7, 8, 9)</option>
                   <option value="MA">MA (Kelas 10, 11, 12)</option>
                   <option value="PIKET">Guru Piket</option>
-                  <option value="ALL">MTs & MA (Tanpa Piket)</option>
+                  <option value="ALL">Semua Tingkat</option>
                 </select>
               </div>
               <div>
@@ -465,15 +465,9 @@
                 </button>
               </div>
               <div class="self-end">
-                <button onclick="exportSemuaRekapMTsMA()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-3 py-2 rounded-lg transition flex items-center space-x-1" title="Download Semua Rekap MTs & MA Tanpa Piket">
+                <button onclick="exportRekapKeExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-3 py-2 rounded-lg transition flex items-center space-x-1">
                   <i class="fa-solid fa-download"></i>
-                  <span>Download Semua (MTs & MA)</span>
-                </button>
-              </div>
-              <div class="self-end">
-                <button onclick="exportRekapKeExcel()" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold text-xs px-3 py-2 rounded-lg transition flex items-center space-x-1">
-                  <i class="fa-solid fa-file-excel"></i>
-                  <span>Download Terpilih</span>
+                  <span>Download XLS</span>
                 </button>
               </div>
             </div>
@@ -891,18 +885,6 @@
           { id: "G-002", nama: "Siti Aminah, S.Ag", mapel: "PAI", username: "sitia", password: "123" }
         ]);
         else if (actionName === "getRiwayatAbsensi") onSuccess([]);
-        else if (actionName === "generateRekapBulananData") {
-          onSuccess({
-            jenjang: paramsArray[2],
-            bulan: "Januari",
-            tahun: paramsArray[0],
-            listGuru: [{ id: "G-001", nama: "Budi Santoso, S.Pd" }, { id: "G-002", nama: "Siti Aminah, S.Ag" }],
-            rekap: {
-              "G-001": { tanggal: { 1: "H" }, jumlah: { H: 1, I: 0, S: 0, A: 0 }, totalPoin: 10 },
-              "G-002": { tanggal: { 1: "H" }, jumlah: { H: 1, I: 0, S: 0, A: 0 }, totalPoin: 10 }
-            }
-          });
-        }
         else onSuccess({ status: "success", message: "Proses berhasil (Simulasi)" });
       }, 300);
     }
@@ -1009,6 +991,7 @@
       callBackend("loginUser", [u, p], function(response) {
         showLoading(false);
         if (response.status === "success") {
+          // Simpan atau hapus kredensial sesuai pilihan checkbox "Ingat Saya"
           simpanKredensialLogin(u, p);
 
           currentUser = response.user;
@@ -1043,6 +1026,7 @@
       viewGuru.classList.add("hidden");
       viewLogin.classList.remove("hidden");
       
+      // Mengisi kembali form login jika ada kredensial tersimpan
       cekKredensialTersimpan();
       
       showAlert("warning", "Sesi Berakhir", "Anda berhasil keluar dari sistem absensi.");
@@ -1729,77 +1713,12 @@
       showAlert("success", "File Berhasil Diunduh", `Berhasil mengunduh dokumen Excel.`);
     }
 
-    /**
-     * FUNGSI UNDUH SEMUA REKAP MTs & MA (TIDAK TERMASUK PIKET)
-     */
-    function exportSemuaRekapMTsMA() {
-      const thn = document.getElementById("rekapTahun").value;
-      const bln = document.getElementById("rekapBulan").value;
-
-      showLoading(true);
-      // Memanggil rekap untuk MTs terlebih dahulu, lalu MA secara berurutan
-      callBackend("generateRekapBulananData", [thn, bln, "MTS"], function(resMts) {
-        if (resMts.error) {
-          showLoading(false);
-          showAlert("danger", "Gagal Memuat MTs", resMts.error);
-          return;
-        }
-
-        callBackend("generateRekapBulananData", [thn, bln, "MA"], function(resMa) {
-          showLoading(false);
-          if (resMa.error) {
-            showAlert("danger", "Gagal Memuat MA", resMa.error);
-            return;
-          }
-
-          // Render sementara untuk MTs lalu download
-          renderRekapGridHTML(resMts);
-          let htmlMts = document.getElementById("excelGridPreview").innerHTML;
-
-          // Render sementara untuk MA lalu ambil kodenya
-          renderRekapGridHTML(resMa);
-          let htmlMa = document.getElementById("excelGridPreview").innerHTML;
-
-          // Gabungkan kedua tabel ke satu file Excel tanpa Piket
-          let combinedHtml = `
-            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head><meta charset="utf-8"></head>
-            <body style="margin:20px;">
-              <h2>REKAP BULANAN PRESENSI GURU MTs & MA (${resMts.bulan} ${thn})</h2>
-              <hr/>
-              <br/>
-              ${htmlMts}
-              <br/><br/><br/>
-              <hr/>
-              ${htmlMa}
-            </body>
-            </html>
-          `;
-
-          const blob = new Blob([combinedHtml], { type: 'application/vnd.ms-excel' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `REKAP_BULANAN_MTS_DAN_MA_${resMts.bulan}_${thn}.xls`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-
-          // Kembalikan tampilan ke data MTs/MA terakhir
-          renderRekapGridHTML(resMts);
-          rekapDataTerakhir = resMts;
-          document.getElementById("rekapJenjang").value = "MTS";
-
-          showAlert("success", "Download Berhasil", "Rekap bulanan MTs dan MA berhasil diunduh (Tanpa rekap piket).");
-        });
-      });
-    }
-
     /* =========================================================================
        LOGIKA SCANNER BARCODE & UI GURU
        ========================================================================= */
 
     function initGuruDashboard() {
+      // Mengisi Mapel Guru
       const mapelSelect = document.getElementById("absenMapel");
       mapelSelect.innerHTML = '<option value="" disabled selected>-- Pilih Mata Pelajaran --</option>';
       if (currentUser && currentUser.mapel && currentUser.mapel.length > 0) {
@@ -1811,6 +1730,7 @@
         });
       }
 
+      // Mengisi Dropdown Kelas Manual untuk Opsi Izin/Sakit/Alpa
       const kelasManualSelect = document.getElementById("absenKelasManual");
       kelasManualSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas/Ruang (Izin/Sakit/Alpa) --</option>';
       masterKelasAdmin.forEach(k => {
@@ -1944,10 +1864,14 @@
       if (btnText) btnText.innerText = "Buka Kamera Scan";
     }
 
+    /**
+     * PROSES DETEKSI KELAS OTOMATIS SAAT SCAN BERHASIL
+     */
     function onScanSuccess(decodedText, decodedResult) {
       hentikanScannerKamera();
 
       const scannedClean = decodedText.trim();
+      
       let detectedClass = "";
       if (scannedClean.startsWith("ABSEN_KELAS_")) {
         detectedClass = scannedClean.replace("ABSEN_KELAS_", "").trim();
@@ -1962,6 +1886,7 @@
         let labelDeteksi = `Kelas ${detectedClass}`;
         if(detectedClass === "PIKET") labelDeteksi = "Ruang PIKET";
 
+        // Batalkan pilihan radio non-hadir jika ada yang terhubung
         const radios = document.getElementsByName("absenStatus");
         radios.forEach(r => r.checked = false);
         toggleKeteranganField('H');
@@ -1995,7 +1920,9 @@
       }
     }
 
-    function onScanFailure(error) {}
+    function onScanFailure(error) {
+      // Pembacaan frame rutin kamera
+    }
 
     function cekSesiWaktuLokal() {
       callBackend("checkCurrentSession", [], function(res) {
@@ -2013,72 +1940,122 @@
         } else {
           card.className = "bg-red-50 rounded-2xl border border-red-200 p-4 shadow-sm flex items-center space-x-4";
           icon.className = "p-3 rounded-full bg-red-100 text-red-500 flex items-center justify-center";
-          icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-xl text-red-500"></i>';
-          title.innerHTML = `<span class="text-red-800 font-bold">Diluar Jam Sesi</span>`;
-          desc.innerText = "Tidak ada sesi absensi aktif saat ini.";
+          icon.innerHTML = '<i class="fa-solid fa-hourglass-end text-xl"></i>';
+          title.innerHTML = `<span class="text-red-800 font-bold">Sesi Absen Tutup</span>`;
+          desc.innerHTML = `<span class="text-red-600">Di luar jam kehadiran guru.</span>`;
         }
-        
-        const now = new Date();
-        const jamStr = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
-        document.getElementById("sessionTimeText").innerHTML += ` (Waktu Anda: ${jamStr} WIB)`;
       });
     }
 
-    function toggleKeteranganField(statusVal) {
+    function toggleKeteranganField(status) {
       const wrapper = document.getElementById("keteranganWrapper");
+      const text = document.getElementById("absenKeterangan");
+      const autoKelasWrapper = document.getElementById("wrapperKelasAuto");
+      const manualKelasWrapper = document.getElementById("wrapperKelasManual");
+      const selectManual = document.getElementById("absenKelasManual");
       const boxHadir = document.getElementById("statusHadirOtomatisBox");
+      
+      const radios = document.getElementsByName("absenStatus");
+      radios.forEach(r => {
+        const parent = r.closest('label');
+        if (r.checked) {
+          parent.classList.add("border-blue-500", "bg-blue-50/50");
+          parent.classList.remove("border-slate-200");
+        } else {
+          parent.classList.remove("border-blue-500", "bg-blue-50/50");
+          parent.classList.add("border-slate-200");
+        }
+      });
 
-      if (statusVal === 'H') {
-        wrapper.classList.add("hidden");
-        if (boxHadir) boxHadir.style.opacity = "1";
-      } else {
+      if (status === 'I' || status === 'S' || status === 'A') {
         wrapper.classList.remove("hidden");
-        if (boxHadir) boxHadir.style.opacity = "0.4";
-        verifiedClassCode = null;
-        autoDetectedClassName = null;
+        text.required = (status !== 'A');
+        if (status === 'A') text.value = "Alpa (Tanpa Keterangan)";
+        else text.value = "";
+
+        autoKelasWrapper.classList.add("hidden");
+        manualKelasWrapper.classList.remove("hidden");
+        selectManual.required = true;
+
+        if (boxHadir) {
+          boxHadir.className = "bg-slate-50 border-2 border-slate-200 rounded-xl p-3 mb-3 flex items-center justify-between transition-all opacity-60";
+          document.getElementById("textStatusHadirDetail").innerText = `Status Hadir dilewati karena Anda memilih opsi (${status}).`;
+        }
+      } else {
+        wrapper.classList.add("hidden");
+        text.required = false;
+        text.value = "";
+
+        autoKelasWrapper.classList.remove("hidden");
+        manualKelasWrapper.classList.add("hidden");
+        selectManual.required = false;
+
+        if (boxHadir) {
+          if (verifiedClassCode && autoDetectedClassName) {
+            boxHadir.className = "bg-emerald-50 border-2 border-emerald-500 rounded-xl p-3 mb-3 flex items-center justify-between transition-all";
+            let label = autoDetectedClassName === "PIKET" ? "Ruang PIKET" : `Kelas ${autoDetectedClassName}`;
+            document.getElementById("textStatusHadirDetail").innerText = `Terkonfirmasi HADIR otomatis untuk ${label}.`;
+          } else {
+            boxHadir.className = "bg-emerald-50/60 border-2 border-slate-200 rounded-xl p-3 mb-3 flex items-center justify-between transition-all";
+            document.getElementById("textStatusHadirDetail").innerText = "Scan Barcode untuk mengonfirmasi kehadiran secara otomatis.";
+          }
+        }
       }
     }
 
     function submitFormAbsen(e) {
       e.preventDefault();
 
-      let finalKelas = "";
-      let finalStatus = "H";
+      const mapel = document.getElementById("absenMapel").value;
+      const ket = document.getElementById("absenKeterangan").value.trim();
       
+      let status = "";
       const radios = document.getElementsByName("absenStatus");
-      let selectedRadioVal = "";
-      radios.forEach(r => { if (r.checked) selectedRadioVal = r.value; });
-
-      if (selectedRadioVal) {
-        finalStatus = selectedRadioVal;
-        finalKelas = document.getElementById("absenKelasManual").value;
-        if (!finalKelas) {
-          showAlert("warning", "Pilih Kelas", "Silakan pilih kelas terlebih dahulu untuk pengisian izin/sakit/alpa.");
-          return;
-        }
-      } else {
-        if (!autoDetectedClassName) {
-          showAlert("warning", "Belum Scan Barcode", "Anda belum melakukan scan QR Code kelas. Silakan scan Barcode kelas terlebih dahulu.");
-          return;
-        }
-        finalStatus = "H";
-        finalKelas = autoDetectedClassName;
+      for (let r of radios) {
+        if (r.checked) { status = r.value; break; }
       }
 
-      const mapel = document.getElementById("absenMapel").value;
-      const keterangan = document.getElementById("absenKeterangan").value.trim();
+      // Jika tidak ada radio (I/S/A) yang dipilih, maka dikonfirmasi HADIR (H) otomatis dari hasil scan
+      if (!status) {
+        if (verifiedClassCode && autoDetectedClassName) {
+          status = "H";
+        } else {
+          showAlert("danger", "Belum Scan Barcode", "Anda belum melakukan scan Barcode ruangan. Silakan scan Barcode untuk terkonfirmasi HADIR, atau pilih status Izin/Sakit/Alpa.");
+          return;
+        }
+      }
+
+      let finalKelas = "";
+
+      if (status === "H") {
+        if (!verifiedClassCode || !autoDetectedClassName) {
+          showAlert("danger", "Belum Scan Barcode", "Anda wajib melakukan scan Barcode yang tertempel di ruangan terlebih dahulu.");
+          return;
+        }
+        finalKelas = autoDetectedClassName;
+      } else {
+        finalKelas = document.getElementById("absenKelasManual").value;
+        if (!finalKelas) {
+          showAlert("warning", "Ruangan Belum Dipilih", "Silakan pilih kelas/ruang piket Anda untuk absensi izin/sakit/alpa.");
+          return;
+        }
+      }
 
       showLoading(true);
-      callBackend("submitAbsensiGuru", [currentUser.id, currentUser.nama, finalKelas, mapel, finalStatus, keterangan], function(response) {
+      callBackend("submitAbsen", [currentUser.id, currentUser.nama, finalKelas, mapel, status, ket, verifiedClassCode || "-"], function(response) {
         showLoading(false);
         if (response.status === "success") {
-          showAlert("success", "Absensi Berhasil Disimpan!", response.message);
-          resetStatusQR();
+          showAlert("success", "Absen Tersimpan", response.message);
+          document.getElementById("absenMapel").value = "";
           document.getElementById("absenKeterangan").value = "";
-          radios.forEach(r => r.checked = false);
+          document.getElementById("absenKelasManual").value = "";
+          document.getElementsByName("absenStatus").forEach(r => r.checked = false);
+          verifiedClassCode = null;
+          autoDetectedClassName = null;
+          resetStatusQR();
           toggleKeteranganField('H');
         } else {
-          showAlert("danger", "Gagal Menyimpan Absen", response.message);
+          showAlert("danger", "Absensi Gagal", response.message);
         }
       });
     }
